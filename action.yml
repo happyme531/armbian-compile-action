@@ -87,6 +87,7 @@ runs:
             wget https://github.com/amazingfate/armbian-h68k-images/raw/master/backport-v6.0.16.patch -O patch/kernel/archive/rk35xx-5.10/backport-6.0.16.patch
             wget https://github.com/amazingfate/armbian-h68k-images/raw/master/linux-rk35xx-legacy.config -O config/kernel/linux-rk35xx-legacy.config
         fi
+        wget https://github.com/happyme531/armbian-h88k-images/raw/master/config -O config/kernel/linux-rk35xx-legacy.config 
         wget https://github.com/amazingfate/armbian-h68k-images/raw/master/hinlink-h66k.conf -O config/boards/hinlink-h66k.conf
         wget https://github.com/amazingfate/armbian-h68k-images/raw/master/hinlink-h68k.conf -O config/boards/hinlink-h68k.conf
         mkdir -p config/desktop/jammy/appgroups/rockchip-multimedia/sources/apt/
