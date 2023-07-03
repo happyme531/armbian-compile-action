@@ -44,14 +44,35 @@ runs:
           echo "desktop-environment=gnome" >> $GITHUB_ENV
           echo "desktop-environment-config-name=config_base" >> $GITHUB_ENV
           echo "expert=yes" >> $GITHUB_ENV
-          if [ "${{ inputs.branch }}" == "legacy" ] && [ "${{ inputs.flavor }}" == "ubuntu" ]; then
+          if [ "${{ inputs.branch }}" == "legacy" ]; then
             if [[ "${{ inputs.board }}" == "rock-3a" || "${{ inputs.board }}" == "hinlink-h66k" || "${{ inputs.board }}" == "hinlink-h68k" ]]; then
               echo "desktop_appgroups_selected=\"3dsupport browsers chat desktop_tools editors email internet multimedia office programming remote_desktop rockchip-multimedia\"" >> $GITHUB_ENV
-            elif [[ "${{ inputs.board }}" == "rock-5b" || "${{ inputs.board }}" == "hinlink-h88k" || "${{ inputs.board }}" == "orangepi5" ]]; then
+            elif [[ "${{ inputs.board }}" == "rock-5b" || "${{ inputs.board }}" == "hinlink-h88k" || "${{ inputs.board }}" == "orangepi5" || "${{ inputs.board }}" == "rock-5a" ]]; then
               echo "desktop_appgroups_selected=\"3dsupport browsers chat desktop_tools editors email internet multimedia office programming remote_desktop rockchip-multimedia panfork-mesa\"" >> $GITHUB_ENV
             else
               echo "desktop_appgroups_selected=\"3dsupport browsers chat desktop_tools editors email internet multimedia office programming remote_desktop\"" >> $GITHUB_ENV
             fi
+          else
+            echo "desktop_appgroups_selected=\"3dsupport browsers chat desktop_tools editors email internet multimedia office programming remote_desktop\"" >> $GITHUB_ENV
+          fi
+        elif [ ${{ inputs.flavor }} == "cli" ]
+        then
+          echo "release=jammy" >> $GITHUB_ENV
+          echo "build-minimal=no" >> $GITHUB_ENV
+          echo "build-desktop=no" >> $GITHUB_ENV
+          echo "desktop-environment=gnome" >> $GITHUB_ENV
+          echo "desktop-environment-config-name=config_base" >> $GITHUB_ENV
+          echo "expert=yes" >> $GITHUB_ENV
+          if [ "${{ inputs.branch }}" == "legacy" ]; then
+            if [[ "${{ inputs.board }}" == "rock-3a" || "${{ inputs.board }}" == "hinlink-h66k" || "${{ inputs.board }}" == "hinlink-h68k" ]]; then
+              echo "desktop_appgroups_selected=\"3dsupport browsers chat desktop_tools editors email internet multimedia office programming remote_desktop rockchip-multimedia\"" >> $GITHUB_ENV
+            elif [[ "${{ inputs.board }}" == "rock-5b" || "${{ inputs.board }}" == "hinlink-h88k" || "${{ inputs.board }}" == "orangepi5" || "${{ inputs.board }}" == "rock-5a" ]]; then
+              echo "desktop_appgroups_selected=\"3dsupport browsers chat desktop_tools editors email internet multimedia office programming remote_desktop rockchip-multimedia panfork-mesa\"" >> $GITHUB_ENV
+            else
+              echo "desktop_appgroups_selected=\"3dsupport browsers chat desktop_tools editors email internet multimedia office programming remote_desktop\"" >> $GITHUB_ENV
+            fi
+          else
+            echo "desktop_appgroups_selected=\"3dsupport browsers chat desktop_tools editors email internet multimedia office programming remote_desktop\"" >> $GITHUB_ENV
           fi
         fi
     - name: Build
@@ -59,23 +80,13 @@ runs:
       run: |
         cd ./build
         touch .ignore_changes
-        wget https://github.com/amazingfate/armbian-h88k-images/raw/master/board-makfile-add-hinlink-h88k.patch -O patch/kernel/rockchip-rk3588-legacy/board-makefile-add-hinlink-h88k.patch
         mkdir -p arch/arm64/boot/dts/rockchip/
-        wget https://github.com/amazingfate/armbian-h88k-images/raw/master/rk3588-hinlink-h88k.dts -O arch/arm64/boot/dts/rockchip/rk3588-hinlink-h88k.dts
-        git diff --no-index --output=./patch/kernel/rockchip-rk3588-legacy/board-dts-add-hinlink-h88k.patch /dev/null arch/arm64/boot/dts/rockchip/rk3588-hinlink-h88k.dts || ls -l ./patch/kernel/rockchip-rk3588-legacy/board-dts-add-hinlink-h88k.patch
-        wget https://github.com/amazingfate/armbian-h88k-images/raw/master/hinlink-h88k.csc -O config/boards/hinlink-h88k.csc
-        cp -r patch/u-boot/legacy/board_rock-5b patch/u-boot/legacy/board_hinlink-h88k
-        wget https://github.com/amazingfate/armbian-h88k-images/raw/master/uboot-hinlink-h88k-config.patch -O patch/u-boot/legacy/board_hinlink-h88k/uboot-hinlink-h88k-config.patch
-        sed -i "s|ext4|fat|g" config/boards/rock-5b.wip
-        wget https://github.com/amazingfate/armbian-h68k-images/raw/master/backport-v6.0.16.patch -O patch/kernel/archive/rk35xx-5.10/backport-6.0.16.patch
-        wget https://github.com/amazingfate/armbian-h68k-images/raw/master/board-add-hinlink-h6xk-makefile.patch -O patch/kernel/archive/rk35xx-5.10/board-add-hinlink-h6xk-makefile.patch
-        wget https://github.com/amazingfate/armbian-h68k-images/raw/master/rk3568-hinlink-h6xk.dtsi -O arch/arm64/boot/dts/rockchip/rk3568-hinlink-h6xk.dtsi
-        wget https://github.com/amazingfate/armbian-h68k-images/raw/master/rk3568-hinlink-h66k.dts -O arch/arm64/boot/dts/rockchip/rk3568-hinlink-h66k.dts
-        wget https://github.com/amazingfate/armbian-h68k-images/raw/master/rk3568-hinlink-h68k.dts -O arch/arm64/boot/dts/rockchip/rk3568-hinlink-h68k.dts
-        git diff --no-index --output=./patch/kernel/archive/rk35xx-5.10/rk3568-dtsi-add-hinlink-h6xk.patch /dev/null arch/arm64/boot/dts/rockchip/rk3568-hinlink-h6xk.dtsi || ls -l ./patch/kernel/archive/rk35xx-5.10/rk3568-dtsi-add-hinlink-h6xk.patch
-        git diff --no-index --output=./patch/kernel/archive/rk35xx-5.10/board-dts-add-hinlink-h66k.patch /dev/null arch/arm64/boot/dts/rockchip/rk3568-hinlink-h66k.dts || ls -l ./patch/kernel/archive/rk35xx-5.10/board-dts-add-hinlink-h66k.patch
-        git diff --no-index --output=./patch/kernel/archive/rk35xx-5.10/board-dts-add-hinlink-h68k.patch /dev/null arch/arm64/boot/dts/rockchip/rk3568-hinlink-h68k.dts || ls -l ./patch/kernel/archive/rk35xx-5.10/board-dts-add-hinlink-h68k.patch
-        wget https://github.com/amazingfate/armbian-h68k-images/raw/master/linux-rk35xx-legacy.config -O config/kernel/linux-rk35xx-legacy.config
+        sed -i "s|ext4|fat|g" config/boards/rock-5b.conf
+        mkdir -p patch/kernel/archive/rk35xx-5.10
+        if [ ${{ inputs.board }} == "hinlink-h68k" ]; then
+            wget https://github.com/amazingfate/armbian-h68k-images/raw/master/backport-v6.0.16.patch -O patch/kernel/archive/rk35xx-5.10/backport-6.0.16.patch
+            wget https://github.com/amazingfate/armbian-h68k-images/raw/master/linux-rk35xx-legacy.config -O config/kernel/linux-rk35xx-legacy.config
+        fi
         wget https://github.com/amazingfate/armbian-h68k-images/raw/master/hinlink-h66k.conf -O config/boards/hinlink-h66k.conf
         wget https://github.com/amazingfate/armbian-h68k-images/raw/master/hinlink-h68k.conf -O config/boards/hinlink-h68k.conf
         mkdir -p config/desktop/jammy/appgroups/rockchip-multimedia/sources/apt/
@@ -88,21 +99,36 @@ runs:
         wget https://github.com/amazingfate/armbian-compile-action/raw/main/panfork-mesa.packages -O config/desktop/jammy/appgroups/panfork-mesa/packages
         git status
         docker pull ghcr.io/armbian/docker-armbian-build:armbian-ubuntu-jammy-latest
-        ./compile.sh \
-        BOARD=${{ inputs.board }} \
-        BRANCH=${{ inputs.branch }} \
-        RELEASE=${{ env.release }} \
-        BUILD_MINIMAL=${{ env.build-minimal }} \
-        BUILD_DESKTOP=${{ env.build-desktop }} \
-        KERNEL_CONFIGURE=no \
-        DESKTOP_ENVIRONMENT=${{ env.desktop-environment }} \
-        DESKTOP_ENVIRONMENT_CONFIG_NAME=${{ env.desktop-environment-config-name }} \
-        DESKTOP_APPGROUPS_SELECTED=${{ env.desktop_appgroups_selected }} \
-        EXPERT=${{ env.expert }} \
-        BOARD_FIRMWARE_INSTALL="-full" \
-        SHARE_LOG=yes \
-        DEBUG=yes \
-        COMPRESS_OUTPUTIMAGE=sha,gpg,xz
+        if [ ${{ inputs.flavor }} == "cli" ];then
+            ./compile.sh \
+            BOARD=${{ inputs.board }} \
+            BRANCH=${{ inputs.branch }} \
+            RELEASE=${{ env.release }} \
+            BUILD_MINIMAL=${{ env.build-minimal }} \
+            BUILD_DESKTOP=${{ env.build-desktop }} \
+            KERNEL_CONFIGURE=no \
+            EXPERT=${{ env.expert }} \
+            BOARD_FIRMWARE_INSTALL="-full" \
+            SHARE_LOG=yes \
+            DEBUG=yes \
+            COMPRESS_OUTPUTIMAGE=sha,gpg,xz
+        else
+            ./compile.sh \
+            BOARD=${{ inputs.board }} \
+            BRANCH=${{ inputs.branch }} \
+            RELEASE=${{ env.release }} \
+            BUILD_MINIMAL=${{ env.build-minimal }} \
+            BUILD_DESKTOP=${{ env.build-desktop }} \
+            KERNEL_CONFIGURE=no \
+            DESKTOP_ENVIRONMENT=${{ env.desktop-environment }} \
+            DESKTOP_ENVIRONMENT_CONFIG_NAME=${{ env.desktop-environment-config-name }} \
+            DESKTOP_APPGROUPS_SELECTED=${{ env.desktop_appgroups_selected }} \
+            EXPERT=${{ env.expert }} \
+            BOARD_FIRMWARE_INSTALL="-full" \
+            SHARE_LOG=yes \
+            DEBUG=yes \
+            COMPRESS_OUTPUTIMAGE=sha,gpg,xz
+        fi
     - name: Upload
       if: inputs.release-id != '' && inputs.github-token != ''
       uses: xresloader/upload-to-github-release@v1
